@@ -36,7 +36,7 @@
 
   var io = new IntersectionObserver(function (entries) {
     var r = entries[0].intersectionRatio;
-    var leaving = prevRatio !== null && (prevRatio - r) > 0.1;
+    var leaving = prevRatio !== null && r < prevRatio;
 
     if (leaving) {
       root.classList.remove('page-writing');
@@ -45,7 +45,7 @@
     }
 
     prevRatio = r;
-  }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+  }, { threshold: [0, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 1] });
 
   io.observe(sheet);
 })();
