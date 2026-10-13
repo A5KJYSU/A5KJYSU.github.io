@@ -25,6 +25,12 @@
 </head>
 <body{% if page.home %} class="home"{% endif %}>
 
+{% if page.home %}
+<!-- 首页全局固定背景层（沿用 hero__* 类名：fixed 背景 + 遮罩，翻页时恒在底层） -->
+<div class="hero__bg" aria-hidden="true"></div>
+<div class="hero__scrim" aria-hidden="true"></div>
+{% endif %}
+
 {{ content }}
 
 <script src="{{ '/script.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

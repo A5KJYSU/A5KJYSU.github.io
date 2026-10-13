@@ -602,13 +602,18 @@ html.home {
 }
 
 .home .hero {
+  height: 100svh;
+  height: 100lvh;
   scroll-snap-align: start;
 }
+
+.home .scroll-cue { bottom: calc(100lvh - 100svh + 24px); }
 
 .home .hero__bg,
 .home .hero__scrim {
   position: fixed;
   inset: 0;
+  pointer-events: none;
 }
 
 .home .writing {
@@ -616,8 +621,8 @@ html.home {
   z-index: 2;
   display: flex;
   flex-direction: column;
-  height: 100vh;
   height: 100svh;
+  height: 100lvh;
   scroll-snap-align: start;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(10, 20, 48, 0.82);
