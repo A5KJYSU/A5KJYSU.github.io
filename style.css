@@ -646,3 +646,10 @@ html.home {
 @media (prefers-reduced-motion: reduce) {
   html.home { scroll-snap-type: none; }
 }
+
+/* ---------- 细节：标题句点收紧 + 隐藏首页页面滚动条 ---------- */
+
+.hero__dot { margin-left: -0.15em; }
+
+html.home { scrollbar-width: none; }
+html.home::-webkit-scrollbar { display: none; }
