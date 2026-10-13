@@ -23,8 +23,8 @@
   targets.forEach(function (el) { io.observe(el); });
 })();
 
-/* 翻页状态：当文章页成为当前页时，给 <html> 加 page-writing，
-   让毛玻璃在翻页过程中平滑「雾化」（无 JS 时由 CSS 兜底直接显示毛玻璃） */
+/* 翻页状态：文章页进入视野（可见 ≥50%）时雾化成毛玻璃；
+   一旦开始离开（可见比例下降）就立即退雾——这样「滑回首页」也能看到平滑过渡 */
 (function () {
   'use strict';
 
@@ -32,12 +32,20 @@
   if (!sheet || !('IntersectionObserver' in window)) return;
 
   var root = document.documentElement;
+  var prevRatio = null;
 
   var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      root.classList.toggle('page-writing', entry.intersectionRatio >= 0.5);
-    });
-  }, { threshold: 0.5 });
+    var r = entries[0].intersectionRatio;
+    var leaving = prevRatio !== null && (prevRatio - r) > 0.1;
+
+    if (leaving) {
+      root.classList.remove('page-writing');
+    } else if (r >= 0.5) {
+      root.classList.add('page-writing');
+    }
+
+    prevRatio = r;
+  }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
 
   io.observe(sheet);
 })();
