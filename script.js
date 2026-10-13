@@ -50,9 +50,9 @@
   io.observe(sheet);
 })();
 
-/* 回程翻页慢速动画：桌面端由 JS 接管「文章页 → 首页」的回滚
-   （原生贴合动画约 0.4s，太快；这里用 1.1s 缓入缓出）
-   去程不动；列表未滚到顶时不接管；反向滚可取消；减弱动态时不接管。 */
+/* 翻页动画（桌面端 JS 接管，上下同速）：
+   首页 ↔ 文章页 统一 800ms 缓入缓出；列表未滚到顶时不接管；
+   反向滚可取消；减弱动态时不接管；脚本失效时自动回落原生贴合。 */
 (function () {
   'use strict';
 
@@ -61,20 +61,53 @@
   if (!sheet || root.className.indexOf('home') === -1) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  var DURATION = 1100;
+  var DURATION = 800;
   var animating = false;
+  var dir = 0;                              // +1 向下翻、-1 向上翻
+  var rafId = null;
 
-  function easeInOutQuad(t) {
+  function easeInOut(t) {
     return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
   }
 
-  function stop() {
-    animating = false;
-    root.style.scrollSnapType = '';        // 交还贴合（会静止在最近的吸附点）
+  function pageTwoTop() {
+    return sheet.offsetTop;
   }
 
-  function atWritingPage() {
-    return window.scrollY > window.innerHeight * 0.45;
+  function stop() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    animating = false;
+    dir = 0;
+    root.style.scrollSnapType = '';          // 交还贴合（静止在最近的吸附点）
+  }
+
+  function glideTo(target, direction) {
+    var start = window.scrollY;
+    if (animating || Math.abs(target - start) < 2) return;
+
+    animating = true;
+    dir = direction;
+    root.style.scrollSnapType = 'none';      // 动画期间关掉贴合，避免与逐帧滚动打架
+
+    var t0 = null;
+
+    function step(now) {
+      if (t0 === null) t0 = now;
+      var p = Math.min(1, (now - t0) / DURATION);
+      window.scrollTo({ top: start + (target - start) * easeInOut(p), behavior: 'instant' });
+      if (p < 1) {
+        rafId = requestAnimationFrame(step);
+      } else {
+        stop();
+      }
+    }
+
+    rafId = requestAnimationFrame(step);
+  }
+
+  function onWritingPage() {
+    return window.scrollY > pageTwoTop() * 0.45;
   }
 
   function listAtTop() {
@@ -82,49 +115,38 @@
     return !inner || inner.scrollTop <= 0;
   }
 
-  function glideToTop() {
-    var start = window.scrollY;
-    if (start <= 1 || animating) return;
-
-    animating = true;
-    root.style.scrollSnapType = 'none';    // 动画期间关掉贴合，避免与逐帧滚动打架
-
-    var t0 = null;
-
-    function step(now) {
-      if (t0 === null) t0 = now;
-      var p = Math.min(1, (now - t0) / DURATION);
-      window.scrollTo({ top: start * (1 - easeInOutQuad(p)), behavior: 'instant' });
-      if (p < 1) {
-        requestAnimationFrame(step);
-      } else {
-        stop();
-      }
-    }
-
-    requestAnimationFrame(step);
-  }
-
   window.addEventListener('wheel', function (e) {
     if (Math.abs(e.deltaY) < 1) return;
 
     if (animating) {
       e.preventDefault();
-      if (e.deltaY > 0) stop();            // 中途反向滚 → 取消慢速回程
+      if (dir !== 0 && e.deltaY * dir < 0) stop();   // 中途反向滚 → 取消本次翻页
       return;
     }
 
-    if (!atWritingPage() || e.deltaY > 0 || !listAtTop()) return;
-
-    e.preventDefault();
-    glideToTop();
+    if (e.deltaY > 0) {
+      if (onWritingPage()) return;                   // 已在文章页：交给列表内滚动
+      e.preventDefault();
+      glideTo(pageTwoTop(), 1);
+    } else {
+      if (!onWritingPage() || !listAtTop()) return;  // 列表未到顶：交给列表内滚动
+      e.preventDefault();
+      glideTo(0, -1);
+    }
   }, { passive: false });
 
   window.addEventListener('keydown', function (e) {
-    if (animating || !atWritingPage() || !listAtTop()) return;
-    if (e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'Home') {
+    if (animating) return;
+    var k = e.key;
+
+    if (k === 'ArrowDown' || k === 'PageDown' || k === 'End') {
+      if (onWritingPage()) return;
       e.preventDefault();
-      glideToTop();
+      glideTo(pageTwoTop(), 1);
+    } else if (k === 'ArrowUp' || k === 'PageUp' || k === 'Home') {
+      if (!onWritingPage() || !listAtTop()) return;
+      e.preventDefault();
+      glideTo(0, -1);
     }
   });
 })();
