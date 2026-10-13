@@ -23,13 +23,9 @@
 <script>document.documentElement.className += ' js';</script>
 <link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
 </head>
-<body>
+<body{% if page.home %} class="home"{% endif %}>
 
 {{ content }}
-
-<footer class="footer">
-  <p>© 2026 A5K · 托管于 GitHub Pages</p>
-</footer>
 
 <script src="{{ '/script.js' | relative_url }}"></script>
 </body>
