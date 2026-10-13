@@ -72,23 +72,7 @@ a { -webkit-tap-highlight-color: transparent; }
   to   { transform: scale(1.03); }
 }
 
-.hero__scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg,
-      rgba(7, 13, 32, 0.82) 0%,
-      rgba(7, 13, 32, 0.55) 28%,
-      rgba(7, 13, 32, 0.18) 52%,
-      rgba(7, 13, 32, 0) 70%),
-    linear-gradient(180deg,
-      rgba(7, 13, 32, 0.28) 0%,
-      rgba(7, 13, 32, 0) 24%,
-      rgba(7, 13, 32, 0) 64%,
-      var(--bg) 100%);
-}
+/* 遮罩（scrim）已移除：背景图直接作为背景，不改动原图观感 */
 
 .hero__content {
   position: absolute;
@@ -364,16 +348,6 @@ a { -webkit-tap-highlight-color: transparent; }
 
   .hero__subtitle { letter-spacing: 0.16em; }
 
-  .hero__scrim {
-    background:
-      linear-gradient(180deg,
-        rgba(7, 13, 32, 0.8) 0%,
-        rgba(7, 13, 32, 0.45) 32%,
-        rgba(7, 13, 32, 0.16) 50%,
-        rgba(7, 13, 32, 0) 66%,
-        var(--bg) 100%);
-  }
-
   .writing__inner { padding-top: 76px; }
 }
 
@@ -561,37 +535,7 @@ a { -webkit-tap-highlight-color: transparent; }
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* ============================================================
-   首屏与文章区的衔接：遮罩基色统一为 #0a1430，过渡拉长变柔
-   （避免左侧被 #070d20 压暗后与下方 #0a1430 出现明显色阶）
-   ============================================================ */
-
-.hero__scrim {
-  background:
-    linear-gradient(90deg,
-      rgba(10, 20, 48, 0.82) 0%,
-      rgba(10, 20, 48, 0.55) 28%,
-      rgba(10, 20, 48, 0.18) 52%,
-      rgba(10, 20, 48, 0) 70%),
-    linear-gradient(180deg,
-      rgba(10, 20, 48, 0.24) 0%,
-      rgba(10, 20, 48, 0) 22%,
-      rgba(10, 20, 48, 0) 52%,
-      rgba(10, 20, 48, 0.5) 80%,
-      #0a1430 100%);
-}
-
-@media (max-width: 768px) {
-  .hero__scrim {
-    background:
-      linear-gradient(180deg,
-        rgba(10, 20, 48, 0.8) 0%,
-        rgba(10, 20, 48, 0.45) 32%,
-        rgba(10, 20, 48, 0.16) 50%,
-        rgba(10, 20, 48, 0) 64%,
-        #0a1430 100%);
-  }
-}
+/* （此前的遮罩色阶衔接方案已随遮罩移除一并撤销） */
 
 /* ============================================================
    首页：整页翻页（hero ⊷ 文章页，滚动贴合 + 文章页内滚）
@@ -609,8 +553,7 @@ html.home {
 
 .home .scroll-cue { bottom: calc(100lvh - 100svh + 24px); }
 
-.home .hero__bg,
-.home .hero__scrim {
+.home .hero__bg {
   position: fixed;
   inset: 0;
   pointer-events: none;

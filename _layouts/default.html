@@ -26,9 +26,8 @@
 <body{% if page.home %} class="home"{% endif %}>
 
 {% if page.home %}
-<!-- 首页全局固定背景层（沿用 hero__* 类名：fixed 背景 + 遮罩，翻页时恒在底层） -->
+<!-- 首页全局固定背景层（fixed 背景图；翻页时恒在底层，两页共用同一张图，非拼接） -->
 <div class="hero__bg" aria-hidden="true"></div>
-<div class="hero__scrim" aria-hidden="true"></div>
 {% endif %}
 
 {{ content }}
