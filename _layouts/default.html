@@ -21,12 +21,12 @@
 <link rel="icon" type="image/png" href="{{ '/assets/icon.png' | relative_url }}">
 <link rel="apple-touch-icon" href="{{ '/assets/icon.png' | relative_url }}">
 <script>document.documentElement.className += ' js';</script>
-<link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
+<link rel="stylesheet" href="{{ '/style.css' | relative_url }}?v={{ site.time | date: '%s' }}">
 </head>
 <body{% if page.home %} class="home"{% endif %}>
 
 {{ content }}
 
-<script src="{{ '/script.js' | relative_url }}"></script>
+<script src="{{ '/script.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 </body>
 </html>
