@@ -1,0 +1,17 @@
+---
+layout: default
+---
+<main class="post">
+  <p class="post__nav"><a href="{{ '/' | relative_url }}">← 回首页</a></p>
+
+  <article class="post__article">
+    <header class="post__header">
+      <p class="post__date">{{ page.date | date: "%Y-%m-%d" }}</p>
+      <h1 class="post__title">{{ page.title }}</h1>
+    </header>
+
+    <div class="post__body">
+{{ content }}
+    </div>
+  </article>
+</main>

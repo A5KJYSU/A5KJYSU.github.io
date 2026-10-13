@@ -1,0 +1,9 @@
+title: "A5K's Blog"
+description: "A5K 的个人主页：文章、项目与链接。"
+url: "https://a5kjysu.github.io"
+baseurl: ""
+timezone: Asia/Shanghai
+future: true
+encoding: UTF-8
+
+markdown: kramdown

@@ -1,0 +1,6 @@
+.codegraph/
+.omo/
+preview/
+node_modules/
+.playwright-mcp/
+_site/
