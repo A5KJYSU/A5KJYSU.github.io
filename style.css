@@ -623,6 +623,7 @@ html:not(.js) .home .writing {
 .home .writing__inner {
   flex: 1 1 auto;
   overflow-y: auto;
+  overscroll-behavior-y: contain;          /* 列表到端点后不再把滚动“链”给整页（翻屏交给 JS 的 800ms 动画） */
   padding: 0 var(--inset-x) 0;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;

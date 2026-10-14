@@ -121,8 +121,8 @@
   function innerCanScroll(el, dir) {
     var inner = el ? el.querySelector('.writing__inner') : null;
     if (!inner) return false;
-    if (dir > 0) return inner.scrollTop + inner.clientHeight < inner.scrollHeight - 1;
-    return inner.scrollTop > 0;
+    if (dir > 0) return inner.scrollTop + inner.clientHeight < inner.scrollHeight - 2;
+    return inner.scrollTop > 2;
   }
 
   /* 先让列表自己滚；到端点后再翻屏。返回 true 表示本次翻屏已接管。 */
