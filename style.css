@@ -549,6 +549,7 @@ html.home {
   height: 100svh;
   height: 100lvh;
   scroll-snap-align: start;
+  scroll-snap-stop: always;   /* 惯性甩动也必须逐屏停靠：大力划不会跳过中间屏 */
 }
 
 .home .scroll-cue { bottom: calc(100lvh - 100svh + 24px); }
@@ -567,6 +568,7 @@ html.home {
   height: 100svh;
   height: 100lvh;
   scroll-snap-align: start;
+  scroll-snap-stop: always;   /* 惯性甩动也必须逐屏停靠（反向同理） */
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(10, 20, 48, 0);
   -webkit-backdrop-filter: blur(0px) saturate(110%);
