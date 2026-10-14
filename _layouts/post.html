@@ -2,7 +2,7 @@
 layout: default
 ---
 <main class="post">
-  <p class="post__nav"><a href="{{ '/' | relative_url }}#post-{{ page.slug }}">← 回首页</a></p>
+  <p class="post__nav"><a href="{{ '/' | relative_url }}?v={{ site.time | date: '%s' }}#post-{{ page.slug }}">← 回首页</a></p>
 
   <article class="post__article">
     <header class="post__header">
