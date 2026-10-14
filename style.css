@@ -601,9 +601,24 @@ html:not(.js) .home .writing {
 }
 
 .home .writing__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   flex: none;
   padding: 48px var(--inset-x) 0;
 }
+
+.writing__nav {
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
+  color: var(--ink-faint);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.4s var(--ease-out);
+}
+
+.writing__nav:hover { color: var(--accent); }
 
 .home .writing__inner {
   flex: 1 1 auto;

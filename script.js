@@ -59,6 +59,7 @@
   var root = document.documentElement;
   var sheet = document.querySelector('.writing');
   if (!sheet || root.className.indexOf('home') === -1) return;
+  if (!document.querySelector('.hero')) return;   // 非首页（如 /projects/）：不接管翻页
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var DURATION = 800;
