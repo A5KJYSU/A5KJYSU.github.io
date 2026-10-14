@@ -112,15 +112,8 @@
     root.style.scrollSnapType = '';          // 交还贴合（静止在最近的吸附点）
   }
 
-  /* dest 传屏元素（推荐）：目标位置每帧解析——手机浏览器工具栏收起/展开导致
-     视口高度与屏高变化时，落点依旧准确，不会在收尾时被吸附纠偏（表现为抖动）。
-     也兼容直接传数字（内部转成固定目标）。 */
-  function glideTo(dest, direction, duration, easing) {
-    var destEl = (dest && dest.nodeType === 1) ? dest : null;
-    var fixed = destEl ? destEl.offsetTop : dest;
-
+  function glideTo(target, direction, duration, easing) {
     var start = window.scrollY;
-    var target = destEl ? destEl.offsetTop : fixed;
     if (animating || Math.abs(target - start) < 2) return;
 
     var dur = duration || DURATION;
@@ -136,8 +129,7 @@
     function step(now) {
       if (t0 === null) t0 = now;
       var p = Math.min(1, (now - t0) / dur);
-      var tgt = destEl ? destEl.offsetTop : fixed;   // 每帧解析真实目标
-      window.scrollTo({ top: start + (tgt - start) * ease(p), behavior: 'instant' });
+      window.scrollTo({ top: start + (target - start) * ease(p), behavior: 'instant' });
       if (p < 1) {
         rafId = requestAnimationFrame(step);
       } else {
@@ -173,9 +165,9 @@
     var next = idx + dir;
     if (next < 0 || next >= sections.length) return false;
     if (sections[next].id === 'projects') {
-      glideTo(sections[next], dir, DURATION_SHEETS, easeInOutQuint);   // 尾端更慢
+      glideTo(sections[next].offsetTop, dir, DURATION_SHEETS, easeInOutQuint);   // 尾端更慢
     } else {
-      glideTo(sections[next], dir, DURATION);
+      glideTo(sections[next].offsetTop, dir, DURATION);
     }
     return true;
   }
@@ -254,9 +246,9 @@
     var next = idx + dir;
     if (next < 0 || next >= sections.length) return;
     if (sections[next].id === 'projects') {
-      glideTo(sections[next], dir, DURATION_SHEETS, easeInOutQuint);
+      glideTo(sections[next].offsetTop, dir, DURATION_SHEETS, easeInOutQuint);
     } else {
-      glideTo(sections[next], dir, DURATION);
+      glideTo(sections[next].offsetTop, dir, DURATION);
     }
   }
 
@@ -331,10 +323,10 @@
       if (move(-1)) e.preventDefault();
     } else if (e.key === 'Home') {
       e.preventDefault();
-      glideTo(sections[0], -1);
+      glideTo(0, -1);
     } else if (e.key === 'End') {
       e.preventDefault();
-      glideTo(sections[sections.length - 1], 1, DURATION_SHEETS, easeInOutQuint);
+      glideTo(sections[sections.length - 1].offsetTop, 1, DURATION_SHEETS, easeInOutQuint);
     }
   });
 
@@ -353,9 +345,9 @@
     if (idx < 0) return;
     e.preventDefault();
     if (target.id === 'projects') {
-      glideTo(target, idx > currentIndex() ? 1 : -1, DURATION_SHEETS, easeInOutQuint);
+      glideTo(target.offsetTop, idx > currentIndex() ? 1 : -1, DURATION_SHEETS, easeInOutQuint);
     } else {
-      glideTo(target, idx > currentIndex() ? 1 : -1, DURATION);
+      glideTo(target.offsetTop, idx > currentIndex() ? 1 : -1, DURATION);
     }
   });
 })();
