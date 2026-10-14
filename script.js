@@ -61,9 +61,11 @@
   io.observe(art);
 })();
 
-/* 首页整页翻页（桌面端 JS 接管，逐屏同速 800ms 缓入缓出）。
+/* 首页整页翻页（桌面端 JS 接管）。
    首页共三屏：hero → 文章 → 项目；
-   滚轮先滚当前屏的列表，列表到端点后再翻到下一屏（反向同理）。 */
+   滚轮先滚当前屏的列表，列表到端点后再翻到下一屏（反向同理）。
+   时长：hero ↔ 文章 800ms（有雾化收尾，观感更长）；
+   文章 → 项目 1000ms（两屏均为毛玻璃、无雾化收尾，800ms 实测观感偏快）。 */
 (function () {
   'use strict';
 
@@ -75,7 +77,8 @@
   var sections = [].slice.call(document.querySelectorAll('.hero, .writing'));
   if (sections.length < 2) return;
 
-  var DURATION = 800;
+  var DURATION = 800;           // 常规翻屏：hero ↔ 文章（带雾化收尾，观感更长）
+  var DURATION_SHEETS = 1000;   // 文章 → 项目：纯滑动、无雾化收尾，稍慢一档以匹配观感
   var animating = false;
   var glideDir = 0;
   var rafId = null;
@@ -92,9 +95,11 @@
     root.style.scrollSnapType = '';          // 交还贴合（静止在最近的吸附点）
   }
 
-  function glideTo(target, direction) {
+  function glideTo(target, direction, duration) {
     var start = window.scrollY;
     if (animating || Math.abs(target - start) < 2) return;
+
+    var dur = duration || DURATION;
 
     animating = true;
     glideDir = direction;
@@ -104,7 +109,7 @@
 
     function step(now) {
       if (t0 === null) t0 = now;
-      var p = Math.min(1, (now - t0) / DURATION);
+      var p = Math.min(1, (now - t0) / dur);
       window.scrollTo({ top: start + (target - start) * easeInOut(p), behavior: 'instant' });
       if (p < 1) {
         rafId = requestAnimationFrame(step);
@@ -140,7 +145,8 @@
     if (innerCanScroll(sections[idx], dir)) return false;
     var next = idx + dir;
     if (next < 0 || next >= sections.length) return false;
-    glideTo(sections[next].offsetTop, dir);
+    var dur = sections[next].id === 'projects' ? DURATION_SHEETS : DURATION;
+    glideTo(sections[next].offsetTop, dir, dur);
     return true;
   }
 
@@ -168,7 +174,7 @@
       glideTo(0, -1);
     } else if (e.key === 'End') {
       e.preventDefault();
-      glideTo(sections[sections.length - 1].offsetTop, 1);
+      glideTo(sections[sections.length - 1].offsetTop, 1, DURATION_SHEETS);
     }
   });
 
@@ -186,6 +192,7 @@
     var idx = sections.indexOf(target);
     if (idx < 0) return;
     e.preventDefault();
-    glideTo(target.offsetTop, idx > currentIndex() ? 1 : -1);
+    var dur = target.id === 'projects' ? DURATION_SHEETS : DURATION;
+    glideTo(target.offsetTop, idx > currentIndex() ? 1 : -1, dur);
   });
 })();
