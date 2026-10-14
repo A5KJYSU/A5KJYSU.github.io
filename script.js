@@ -23,8 +23,10 @@
   targets.forEach(function (el) { io.observe(el); });
 })();
 
-/* 每块「纸面」（文章/项目）进入视野（可见 ≥50%）时雾化成毛玻璃；
-   一开始离开就退雾——来回都有平滑过渡；屏间互相独立。 */
+/* 纸面雾化规则（方向感知）：
+   - 到屏（可见 ≥50%）起雾（与 hero→文章 同款）；
+   - 往「上」翻（回 hero 方向）：一开始离开就退雾——回程能看到散雾；
+   - 往「下」翻（去项目）：保持毛玻璃不散，直到完全离屏才静默复位（避免中途一闪“清透”）。 */
 (function () {
   'use strict';
 
@@ -32,6 +34,17 @@
   if (!sheets.length || !('IntersectionObserver' in window)) return;
 
   var ratios = [];
+  var lastY = window.scrollY;
+  var movingUp = false;
+
+  window.addEventListener('scroll', function () {
+    var y = window.scrollY;
+    if (Math.abs(y - lastY) > 0.5) {
+      movingUp = y < lastY;
+      lastY = y;
+    }
+  }, { passive: true });
+
   var io = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       var el = entry.target;
@@ -40,10 +53,13 @@
       var r = entry.intersectionRatio;
       var prev = ratios[i];
       var leaving = prev !== undefined && r < prev;
-      if (leaving) {
-        el.classList.remove('is-frosted');
-      } else if (r >= 0.5) {
+
+      if (r >= 0.5) {
         el.classList.add('is-frosted');
+      } else if (leaving && movingUp) {
+        el.classList.remove('is-frosted');     // 回程：可见退雾
+      } else if (r < 0.02) {
+        el.classList.remove('is-frosted');     // 已离屏：静默复位
       }
       ratios[i] = r;
     });
