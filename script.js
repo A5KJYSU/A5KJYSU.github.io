@@ -63,7 +63,7 @@
 
 /* 首页整页翻页（桌面端 JS 接管）。
    首页共三屏：hero → 文章 → 项目；
-   滚轮先滚当前屏的列表，列表到端点后再翻到下一屏（反向同理）。
+   滚轮先滚当前屏的列表；列表到端点后需再累计约 1.5 格滚轮量才翻到下一屏（反向同理，防误触乱跳）。
    时长：hero ↔ 文章 800ms（有雾化收尾，观感更长）；
    文章 → 项目 1000ms（两屏均为毛玻璃、无雾化收尾，800ms 实测观感偏快）。
    缓动：quart 缓入缓出——加速完之后尾段渐渐慢下来（四段翻页统一）；
@@ -162,17 +162,53 @@
     return true;
   }
 
+  /* 到端点后的翻页门槛：列表滚到顶/底后，需要在端点继续同方向累计约 1.5 格滚轮量
+     才触发翻屏，避免快速滚动余量 / 轻微误触直接把页面翻走。
+     复位时机：列表恢复可滚、翻页动画期间、反向滚动、翻屏完成。 */
+  var EDGE_GATE = 150;
+  var edgeAcc = 0;
+  var edgeDir = 0;
+
+  function resetEdgeGate() {
+    edgeAcc = 0;
+    edgeDir = 0;
+  }
+
   window.addEventListener('wheel', function (e) {
     if (Math.abs(e.deltaY) < 1) return;
     var dir = e.deltaY > 0 ? 1 : -1;
 
     if (animating) {
       e.preventDefault();
+      resetEdgeGate();
       if (glideDir !== 0 && dir !== glideDir) stop();   // 中途反向滚 → 取消本次翻页
       return;
     }
 
-    if (move(dir)) e.preventDefault();
+    var sec = sections[currentIndex()];
+
+    /* 无列表的屏（hero）：维持一格即翻 */
+    if (!sec.querySelector('.writing__inner')) {
+      resetEdgeGate();
+      if (move(dir)) e.preventDefault();
+      return;
+    }
+
+    /* 列表还能滚：交给列表原生滚动，并清空已累计的门槛量 */
+    if (innerCanScroll(sec, dir)) {
+      resetEdgeGate();
+      return;
+    }
+
+    /* 列表已到顶/底：同方向累计滚轮量，反向则归零重计 */
+    if (dir !== edgeDir) { edgeDir = dir; edgeAcc = 0; }
+    edgeAcc += Math.abs(e.deltaY);
+    e.preventDefault();
+
+    if (edgeAcc >= EDGE_GATE) {          // 超过门槛 → 翻屏
+      resetEdgeGate();
+      move(dir);
+    }
   }, { passive: false });
 
   window.addEventListener('keydown', function (e) {
