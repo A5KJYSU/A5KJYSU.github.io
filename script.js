@@ -65,7 +65,8 @@
    首页共三屏：hero → 文章 → 项目；
    滚轮先滚当前屏的列表，列表到端点后再翻到下一屏（反向同理）。
    时长：hero ↔ 文章 800ms（有雾化收尾，观感更长）；
-   文章 → 项目 1000ms（两屏均为毛玻璃、无雾化收尾，800ms 实测观感偏快）。 */
+   文章 → 项目 1000ms（两屏均为毛玻璃、无雾化收尾，800ms 实测观感偏快）。
+   缓动：quart 缓入缓出——加速完之后尾段渐渐慢下来（四段翻页统一）。 */
 (function () {
   'use strict';
 
@@ -83,8 +84,9 @@
   var glideDir = 0;
   var rafId = null;
 
-  function easeInOut(t) {
-    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  function easeInOutQuart(t) {
+    // 缓入 + 更长的缓出尾段（quart）：加速完之后渐渐慢下来
+    return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
   }
 
   function stop() {
@@ -110,7 +112,7 @@
     function step(now) {
       if (t0 === null) t0 = now;
       var p = Math.min(1, (now - t0) / dur);
-      window.scrollTo({ top: start + (target - start) * easeInOut(p), behavior: 'instant' });
+      window.scrollTo({ top: start + (target - start) * easeInOutQuart(p), behavior: 'instant' });
       if (p < 1) {
         rafId = requestAnimationFrame(step);
       } else {
