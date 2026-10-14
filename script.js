@@ -46,6 +46,13 @@
     }
   }, { passive: true });
 
+  /* 翻页动画开始时同步运动方向与基线：避免上一段滚动的方向残留，
+     导致首个亚像素帧就误触发退雾（锚点点击切到项目页时曾出现"先轻微退雾再起雾"的闪烁）。 */
+  window.__glideStart = function (dir) {
+    movingUp = dir < 0;
+    lastY = window.scrollY;
+  };
+
   var io = new IntersectionObserver(function (entries) {
     var r = entries[0].intersectionRatio;
     var leaving = prevRatio !== null && r < prevRatio;
@@ -113,6 +120,7 @@
     animating = true;
     glideDir = direction;
     root.style.scrollSnapType = 'none';      // 动画期间关掉贴合，避免与逐帧滚动打架
+    if (window.__glideStart) window.__glideStart(direction);   // 同步雾化方向判定（防锚点切换误退雾）
 
     var t0 = null;
 
