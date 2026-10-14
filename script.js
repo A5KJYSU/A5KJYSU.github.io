@@ -256,7 +256,7 @@
     var dir = dy > 0 ? 1 : -1;
 
     if (animating) {
-      e.preventDefault();                // 翻页动画期间冻结触屏
+      if (e.cancelable) e.preventDefault();   // 翻页动画期间冻结触屏
       return;
     }
 
@@ -274,7 +274,7 @@
       return;
     }
 
-    e.preventDefault();                  // 已到顶/底：拦下橡皮筋与链滚
+    if (e.cancelable) e.preventDefault();  // 已到顶/底：尽可能拦下橡皮筋与链滚（被浏览器接管的手势拦不住也无妨）
     if (dir !== touchDir) { touchDir = dir; touchAcc = 0; }
     touchAcc += Math.abs(dy);
 
