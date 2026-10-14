@@ -50,10 +50,10 @@
     var r = entries[0].intersectionRatio;
     var leaving = prevRatio !== null && r < prevRatio;
 
-    if (r >= 0.5) {
-      root.classList.add('sheets-frosted');
-    } else if (leaving && movingUp) {
-      root.classList.remove('sheets-frosted');
+    if (leaving && movingUp) {
+      root.classList.remove('sheets-frosted');   // 回程：一开始离开就退雾
+    } else if (r >= 0.5) {
+      root.classList.add('sheets-frosted');      // 进入纸面区：起雾
     }
     prevRatio = r;
   }, { threshold: [0, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 1] });
