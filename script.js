@@ -66,7 +66,8 @@
    滚轮先滚当前屏的列表，列表到端点后再翻到下一屏（反向同理）。
    时长：hero ↔ 文章 800ms（有雾化收尾，观感更长）；
    文章 → 项目 1000ms（两屏均为毛玻璃、无雾化收尾，800ms 实测观感偏快）。
-   缓动：quart 缓入缓出——加速完之后尾段渐渐慢下来（四段翻页统一）。 */
+   缓动：quart 缓入缓出——加速完之后尾段渐渐慢下来（四段翻页统一）；
+   文章 → 项目 额外用 quint：尾端再慢一档。 */
 (function () {
   'use strict';
 
@@ -89,6 +90,11 @@
     return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
   }
 
+  function easeInOutQuint(t) {
+    // 更缓的尾段（quint）：专用于文章 → 项目，尾端更慢一档
+    return t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
+  }
+
   function stop() {
     if (rafId) cancelAnimationFrame(rafId);
     rafId = null;
@@ -97,11 +103,12 @@
     root.style.scrollSnapType = '';          // 交还贴合（静止在最近的吸附点）
   }
 
-  function glideTo(target, direction, duration) {
+  function glideTo(target, direction, duration, easing) {
     var start = window.scrollY;
     if (animating || Math.abs(target - start) < 2) return;
 
     var dur = duration || DURATION;
+    var ease = easing || easeInOutQuart;
 
     animating = true;
     glideDir = direction;
@@ -112,7 +119,7 @@
     function step(now) {
       if (t0 === null) t0 = now;
       var p = Math.min(1, (now - t0) / dur);
-      window.scrollTo({ top: start + (target - start) * easeInOutQuart(p), behavior: 'instant' });
+      window.scrollTo({ top: start + (target - start) * ease(p), behavior: 'instant' });
       if (p < 1) {
         rafId = requestAnimationFrame(step);
       } else {
@@ -147,8 +154,11 @@
     if (innerCanScroll(sections[idx], dir)) return false;
     var next = idx + dir;
     if (next < 0 || next >= sections.length) return false;
-    var dur = sections[next].id === 'projects' ? DURATION_SHEETS : DURATION;
-    glideTo(sections[next].offsetTop, dir, dur);
+    if (sections[next].id === 'projects') {
+      glideTo(sections[next].offsetTop, dir, DURATION_SHEETS, easeInOutQuint);   // 尾端更慢
+    } else {
+      glideTo(sections[next].offsetTop, dir, DURATION);
+    }
     return true;
   }
 
@@ -176,7 +186,7 @@
       glideTo(0, -1);
     } else if (e.key === 'End') {
       e.preventDefault();
-      glideTo(sections[sections.length - 1].offsetTop, 1, DURATION_SHEETS);
+      glideTo(sections[sections.length - 1].offsetTop, 1, DURATION_SHEETS, easeInOutQuint);
     }
   });
 
@@ -194,7 +204,10 @@
     var idx = sections.indexOf(target);
     if (idx < 0) return;
     e.preventDefault();
-    var dur = target.id === 'projects' ? DURATION_SHEETS : DURATION;
-    glideTo(target.offsetTop, idx > currentIndex() ? 1 : -1, dur);
+    if (target.id === 'projects') {
+      glideTo(target.offsetTop, idx > currentIndex() ? 1 : -1, DURATION_SHEETS, easeInOutQuint);
+    } else {
+      glideTo(target.offsetTop, idx > currentIndex() ? 1 : -1, DURATION);
+    }
   });
 })();
