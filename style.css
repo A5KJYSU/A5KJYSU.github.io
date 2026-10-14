@@ -600,10 +600,15 @@ html:not(.js) .home .writing {
   .home .writing { transition: none; }
 }
 
+.home .writing__head {
+  flex: none;
+  padding: 48px var(--inset-x) 0;
+}
+
 .home .writing__inner {
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: 48px var(--inset-x) 0;
+  padding: 0 var(--inset-x) 0;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }

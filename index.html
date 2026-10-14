@@ -26,8 +26,11 @@ home: true
 </header>
 
 <main class="writing" id="writing">
-  <div class="writing__inner">
+  <div class="writing__head">
     <h2 class="writing__heading reveal">文章 / 项目</h2>
+  </div>
+
+  <div class="writing__inner">
 
 {% for post in site.posts %}
     <a class="card reveal" href="{{ post.url | relative_url }}">
