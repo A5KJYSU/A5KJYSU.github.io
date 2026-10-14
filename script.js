@@ -23,63 +23,63 @@
   targets.forEach(function (el) { io.observe(el); });
 })();
 
-/* 翻页状态：文章页进入视野（可见 ≥50%）时雾化成毛玻璃；
-   一旦开始离开（可见比例下降）就立即退雾——这样「滑回首页」也能看到平滑过渡 */
+/* 每块「纸面」（文章/项目）进入视野（可见 ≥50%）时雾化成毛玻璃；
+   一开始离开就退雾——来回都有平滑过渡；屏间互相独立。 */
 (function () {
   'use strict';
 
-  var sheet = document.querySelector('.writing');
-  if (!sheet || !('IntersectionObserver' in window)) return;
+  var sheets = [].slice.call(document.querySelectorAll('.writing'));
+  if (!sheets.length || !('IntersectionObserver' in window)) return;
 
-  var root = document.documentElement;
-  var prevRatio = null;
-
+  var ratios = [];
   var io = new IntersectionObserver(function (entries) {
-    var r = entries[0].intersectionRatio;
-    var leaving = prevRatio !== null && r < prevRatio;
-
-    if (leaving) {
-      root.classList.remove('page-writing');
-    } else if (r >= 0.5) {
-      root.classList.add('page-writing');
-    }
-
-    prevRatio = r;
+    entries.forEach(function (entry) {
+      var el = entry.target;
+      var i = sheets.indexOf(el);
+      if (i < 0) return;
+      var r = entry.intersectionRatio;
+      var prev = ratios[i];
+      var leaving = prev !== undefined && r < prev;
+      if (leaving) {
+        el.classList.remove('is-frosted');
+      } else if (r >= 0.5) {
+        el.classList.add('is-frosted');
+      }
+      ratios[i] = r;
+    });
   }, { threshold: [0, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 1] });
 
-  io.observe(sheet);
+  sheets.forEach(function (s) { io.observe(s); });
 })();
 
-/* 翻页动画（桌面端 JS 接管，上下同速）：
-   首页 ↔ 文章页 统一 800ms 缓入缓出；列表未滚到顶时不接管；
-   反向滚可取消；减弱动态时不接管；脚本失效时自动回落原生贴合。 */
+/* 首页整页翻页（桌面端 JS 接管，逐屏同速 800ms 缓入缓出）。
+   首页共三屏：hero → 文章 → 项目；
+   滚轮先滚当前屏的列表，列表到端点后再翻到下一屏（反向同理）。 */
 (function () {
   'use strict';
 
   var root = document.documentElement;
-  var sheet = document.querySelector('.writing');
-  if (!sheet || root.className.indexOf('home') === -1) return;
-  if (!document.querySelector('.hero')) return;   // 非首页（如 /projects/）：不接管翻页
+  if (root.className.indexOf('home') === -1) return;
+  if (!document.querySelector('.hero')) return;          // 非首页不接管
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var sections = [].slice.call(document.querySelectorAll('.hero, .writing'));
+  if (sections.length < 2) return;
 
   var DURATION = 800;
   var animating = false;
-  var dir = 0;                              // +1 向下翻、-1 向上翻
+  var glideDir = 0;
   var rafId = null;
 
   function easeInOut(t) {
     return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
   }
 
-  function pageTwoTop() {
-    return sheet.offsetTop;
-  }
-
   function stop() {
     if (rafId) cancelAnimationFrame(rafId);
     rafId = null;
     animating = false;
-    dir = 0;
+    glideDir = 0;
     root.style.scrollSnapType = '';          // 交还贴合（静止在最近的吸附点）
   }
 
@@ -88,7 +88,7 @@
     if (animating || Math.abs(target - start) < 2) return;
 
     animating = true;
-    dir = direction;
+    glideDir = direction;
     root.style.scrollSnapType = 'none';      // 动画期间关掉贴合，避免与逐帧滚动打架
 
     var t0 = null;
@@ -107,47 +107,76 @@
     rafId = requestAnimationFrame(step);
   }
 
-  function onWritingPage() {
-    return window.scrollY > pageTwoTop() * 0.45;
+  function currentIndex() {
+    var mid = window.scrollY + window.innerHeight * 0.5;
+    var best = 0;
+    var bestD = Infinity;
+    for (var i = 0; i < sections.length; i++) {
+      var d = Math.abs(sections[i].offsetTop + window.innerHeight * 0.5 - mid);
+      if (d < bestD) { bestD = d; best = i; }
+    }
+    return best;
   }
 
-  function listAtTop() {
-    var inner = sheet.querySelector('.writing__inner');
-    return !inner || inner.scrollTop <= 0;
+  function innerCanScroll(el, dir) {
+    var inner = el ? el.querySelector('.writing__inner') : null;
+    if (!inner) return false;
+    if (dir > 0) return inner.scrollTop + inner.clientHeight < inner.scrollHeight - 1;
+    return inner.scrollTop > 0;
+  }
+
+  /* 先让列表自己滚；到端点后再翻屏。返回 true 表示本次翻屏已接管。 */
+  function move(dir) {
+    var idx = currentIndex();
+    if (innerCanScroll(sections[idx], dir)) return false;
+    var next = idx + dir;
+    if (next < 0 || next >= sections.length) return false;
+    glideTo(sections[next].offsetTop, dir);
+    return true;
   }
 
   window.addEventListener('wheel', function (e) {
     if (Math.abs(e.deltaY) < 1) return;
+    var dir = e.deltaY > 0 ? 1 : -1;
 
     if (animating) {
       e.preventDefault();
-      if (dir !== 0 && e.deltaY * dir < 0) stop();   // 中途反向滚 → 取消本次翻页
+      if (glideDir !== 0 && dir !== glideDir) stop();   // 中途反向滚 → 取消本次翻页
       return;
     }
 
-    if (e.deltaY > 0) {
-      if (onWritingPage()) return;                   // 已在文章页：交给列表内滚动
-      e.preventDefault();
-      glideTo(pageTwoTop(), 1);
-    } else {
-      if (!onWritingPage() || !listAtTop()) return;  // 列表未到顶：交给列表内滚动
-      e.preventDefault();
-      glideTo(0, -1);
-    }
+    if (move(dir)) e.preventDefault();
   }, { passive: false });
 
   window.addEventListener('keydown', function (e) {
     if (animating) return;
-    var k = e.key;
-
-    if (k === 'ArrowDown' || k === 'PageDown' || k === 'End') {
-      if (onWritingPage()) return;
-      e.preventDefault();
-      glideTo(pageTwoTop(), 1);
-    } else if (k === 'ArrowUp' || k === 'PageUp' || k === 'Home') {
-      if (!onWritingPage() || !listAtTop()) return;
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+      if (move(1)) e.preventDefault();
+    } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      if (move(-1)) e.preventDefault();
+    } else if (e.key === 'Home') {
       e.preventDefault();
       glideTo(0, -1);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      glideTo(sections[sections.length - 1].offsetTop, 1);
     }
+  });
+
+  /* 页内锚点（向下看看 / 项目 → / 文章 →）也走同一套慢速翻页 */
+  document.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== document && !(el.tagName === 'A' && el.getAttribute('href'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === document) return;
+    var href = el.getAttribute('href');
+    if (!href || href.charAt(0) !== '#') return;
+    var target = document.getElementById(href.slice(1));
+    if (!target) return;
+    var idx = sections.indexOf(target);
+    if (idx < 0) return;
+    e.preventDefault();
+    glideTo(target.offsetTop, idx > currentIndex() ? 1 : -1);
   });
 })();

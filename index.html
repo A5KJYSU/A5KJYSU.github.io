@@ -28,7 +28,7 @@ home: true
 <main class="writing" id="writing">
   <div class="writing__head">
     <h2 class="writing__heading reveal">文章</h2>
-    <a class="writing__nav reveal" href="/projects/">项目 →</a>
+    <a class="writing__nav reveal" href="#projects">项目 →</a>
   </div>
 
   <div class="writing__inner">
@@ -49,9 +49,31 @@ home: true
 <!-- 项目已迁至 /projects/ 页面（首页只列文章） -->
 
     <p class="writing__more reveal reveal--d2">更多内容筹备中。</p>
+  </div>
+</main>
+
+<section class="writing" id="projects" aria-label="项目">
+  <div class="writing__head">
+    <h2 class="writing__heading reveal">项目</h2>
+    <a class="writing__nav reveal" href="#writing">文章 →</a>
+  </div>
+
+  <div class="writing__inner">
+{% for project in site.data.projects %}
+    <a class="card reveal" href="{{ project.url }}" target="_blank" rel="noopener">
+      <div class="card__top">
+        <span class="card__tag">项目</span>
+        <span class="card__arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13m-6-6 6 6-6 6"/></svg>
+        </span>
+      </div>
+      <h3 class="card__title">{{ project.name }}</h3>
+      <p class="card__desc">{{ project.description }}</p>
+    </a>
+{% endfor %}
 
     <footer class="footer">
       <p>© 2026 A5K · 托管于 GitHub Pages</p>
     </footer>
   </div>
-</main>
+</section>
