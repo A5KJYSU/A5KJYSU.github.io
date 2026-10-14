@@ -578,8 +578,8 @@ html.home {
     backdrop-filter 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* 纸面雾化（可见 ≥50% 时）：起雾 0.8s；退雾见上一条（0.4s 快速清透） */
-.home .writing.is-frosted {
+/* 纸面区雾化（全局，hero↔纸面之间切换；文章↔项目保持不散） */
+.home.sheets-frosted .writing {
   background: rgba(10, 20, 48, 0.5);
   -webkit-backdrop-filter: blur(26px) saturate(140%);
   backdrop-filter: blur(26px) saturate(140%);

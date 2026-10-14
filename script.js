@@ -23,17 +23,18 @@
   targets.forEach(function (el) { io.observe(el); });
 })();
 
-/* 纸面雾化规则（方向感知）：
-   - 到屏（可见 ≥50%）起雾（与 hero→文章 同款）；
-   - 往「上」翻（回 hero 方向）：一开始离开就退雾——回程能看到散雾；
-   - 往「下」翻（去项目）：保持毛玻璃不散，直到完全离屏才静默复位（避免中途一闪“清透”）。 */
+/* 纸面区雾化（全局）：三屏中只有「hero ↔ 纸面区」之间存在雾化切换——
+   - 进入纸面区（文章屏可见 ≥50%）起雾（hero→文章 的进场效果）；
+   - 往 hero 方向离开时退雾（回程可见散雾）；
+   - 文章 ↔ 项目 两屏都是毛玻璃：切换时保持不散，直接平滑滑过。 */
 (function () {
   'use strict';
 
-  var sheets = [].slice.call(document.querySelectorAll('.writing'));
-  if (!sheets.length || !('IntersectionObserver' in window)) return;
+  var art = document.getElementById('writing');
+  if (!art || !('IntersectionObserver' in window)) return;
 
-  var ratios = [];
+  var root = document.documentElement;
+  var prevRatio = null;
   var lastY = window.scrollY;
   var movingUp = false;
 
@@ -46,26 +47,18 @@
   }, { passive: true });
 
   var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      var el = entry.target;
-      var i = sheets.indexOf(el);
-      if (i < 0) return;
-      var r = entry.intersectionRatio;
-      var prev = ratios[i];
-      var leaving = prev !== undefined && r < prev;
+    var r = entries[0].intersectionRatio;
+    var leaving = prevRatio !== null && r < prevRatio;
 
-      if (r >= 0.5) {
-        el.classList.add('is-frosted');
-      } else if (leaving && movingUp) {
-        el.classList.remove('is-frosted');     // 回程：可见退雾
-      } else if (r < 0.02) {
-        el.classList.remove('is-frosted');     // 已离屏：静默复位
-      }
-      ratios[i] = r;
-    });
+    if (r >= 0.5) {
+      root.classList.add('sheets-frosted');
+    } else if (leaving && movingUp) {
+      root.classList.remove('sheets-frosted');
+    }
+    prevRatio = r;
   }, { threshold: [0, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 1] });
 
-  sheets.forEach(function (s) { io.observe(s); });
+  io.observe(art);
 })();
 
 /* 首页整页翻页（桌面端 JS 接管，逐屏同速 800ms 缓入缓出）。
