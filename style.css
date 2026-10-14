@@ -291,10 +291,14 @@ a { -webkit-tap-highlight-color: transparent; }
 .footer p {
   margin: 0;
   padding: 1.5rem var(--inset-x) 2.1rem;
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   letter-spacing: 0.12em;
   color: var(--ink-faint);
 }
+
+/* 致谢行紧随版权行：收紧行距 */
+.footer p.footer__thanks { padding-bottom: 0.4rem; }
+.footer p + p { padding-top: 0.25rem; }
 
 /* ---------- entry animations ---------- */
 
@@ -650,6 +654,8 @@ html:not(.js) .home .writing {
 .home .writing__heading { margin-bottom: 1.8rem; }
 .home .footer { margin-top: 40px; }
 .home .footer p { padding: 1.3rem 0 1.8rem; }
+.home .footer p.footer__thanks { padding-bottom: 0.4rem; }
+.home .footer p + p { padding-top: 0.25rem; }
 
 @media (prefers-reduced-motion: reduce) {
   html.home { scroll-snap-type: none; }
