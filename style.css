@@ -300,6 +300,15 @@ a { -webkit-tap-highlight-color: transparent; }
 .footer p.footer__thanks { padding-bottom: 0.4rem; }
 .footer p + p { padding-top: 0.25rem; }
 
+/* 致谢行里的小鲸鱼图标（随文字颜色、随字号缩放） */
+.footer__whale {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  vertical-align: -0.12em;
+  margin-right: 0.3em;
+}
+
 /* ---------- entry animations ---------- */
 
 .hero__title,
