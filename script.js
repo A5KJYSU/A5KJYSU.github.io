@@ -70,7 +70,8 @@
 
 /* 首页整页翻页（桌面端 JS 接管）。
    首页共三屏：hero → 文章 → 项目；
-   滚轮先滚当前屏的列表；列表到端点后需再累计约 1.5 格滚轮量才翻到下一屏（反向同理，防误触乱跳）。
+   滚轮先滚当前屏的列表；列表到端点后需再累计约 1.5 格滚轮量才翻到下一屏（反向同理）。
+   触屏：列表划到顶/底后，继续同方向划动累计约 80px 才翻屏（单次手势内累计，松手清零，防误触乱跳）。
    时长：hero ↔ 文章 800ms（有雾化收尾，观感更长）；
    文章 → 项目 1000ms（两屏均为毛玻璃、无雾化收尾，800ms 实测观感偏快）。
    缓动：quart 缓入缓出——加速完之后尾段渐渐慢下来（四段翻页统一）；
@@ -215,6 +216,70 @@
 
     if (edgeAcc >= EDGE_GATE) {          // 超过门槛 → 翻屏
       resetEdgeGate();
+      move(dir);
+    }
+  }, { passive: false });
+
+  /* 触屏（手机）同款门槛：列表划到顶/底后，继续同方向划动累计约 80px 才翻屏。
+     只在单次手势内累计（松手清零），保证惯性甩动不会误触发；
+     翻页动画期间冻结触屏，避免与逐帧滚动打架。 */
+  var TOUCH_GATE = 80;
+  var touchAcc = 0;
+  var touchDir = 0;
+  var touchLastY = null;
+
+  function resetTouchGate() {
+    touchAcc = 0;
+    touchDir = 0;
+    touchLastY = null;
+  }
+
+  window.addEventListener('touchstart', function (e) {
+    if (e.touches.length !== 1) { resetTouchGate(); return; }
+    touchAcc = 0;
+    touchDir = 0;
+    touchLastY = e.touches[0].clientY;
+  }, { passive: true });
+
+  window.addEventListener('touchcancel', resetTouchGate, { passive: true });
+
+  window.addEventListener('touchend', resetTouchGate, { passive: true });
+
+  window.addEventListener('touchmove', function (e) {
+    if (e.touches.length !== 1) { resetTouchGate(); return; }
+    if (touchLastY === null) { touchLastY = e.touches[0].clientY; return; }
+
+    var y = e.touches[0].clientY;
+    var dy = touchLastY - y;             // 手指上移 = 内容向下滚（与滚轮同向）
+    touchLastY = y;
+    if (Math.abs(dy) < 1) return;
+    var dir = dy > 0 ? 1 : -1;
+
+    if (animating) {
+      e.preventDefault();                // 翻页动画期间冻结触屏
+      return;
+    }
+
+    var sec = sections[currentIndex()];
+
+    /* 无列表的屏（hero）：交给原生滚动与贴合 */
+    if (!sec.querySelector('.writing__inner')) {
+      resetTouchGate();
+      return;
+    }
+
+    /* 列表还能滚：交给原生滚动，不拦截 */
+    if (innerCanScroll(sec, dir)) {
+      resetTouchGate();
+      return;
+    }
+
+    e.preventDefault();                  // 已到顶/底：拦下橡皮筋与链滚
+    if (dir !== touchDir) { touchDir = dir; touchAcc = 0; }
+    touchAcc += Math.abs(dy);
+
+    if (touchAcc >= TOUCH_GATE) {        // 超过门槛 → 翻屏
+      resetTouchGate();
       move(dir);
     }
   }, { passive: false });
