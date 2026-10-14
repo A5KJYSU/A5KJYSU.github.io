@@ -71,7 +71,8 @@
 /* 首页整页翻页（桌面端 JS 接管）。
    首页共三屏：hero → 文章 → 项目；
    滚轮先滚当前屏的列表；列表到端点后需再累计约 1.5 格滚轮量才翻到下一屏（反向同理）。
-   触屏：列表划到顶/底后，继续同方向划动累计约 80px 才翻屏（单次手势内累计，松手清零，防误触乱跳）。
+   触屏：卡片列表内走原生滚动 + 端点门槛（累计约 80px 翻屏）；列表外（hero/标题区）为整屏手势
+   （松手净位移 ≥45px 翻相邻一屏），由 JS 全程接管，保证任何内核都不会因惯性甩动跳过中间屏。
    时长：hero ↔ 文章 800ms（有雾化收尾，观感更长）；
    文章 → 项目 1000ms（两屏均为毛玻璃、无雾化收尾，800ms 实测观感偏快）。
    缓动：quart 缓入缓出——加速完之后尾段渐渐慢下来（四段翻页统一）；
@@ -220,13 +221,18 @@
     }
   }, { passive: false });
 
-  /* 触屏（手机）同款门槛：列表划到顶/底后，继续同方向划动累计约 80px 才翻屏。
-     只在单次手势内累计（松手清零），保证惯性甩动不会误触发；
-     翻页动画期间冻结触屏，避免与逐帧滚动打架。 */
-  var TOUCH_GATE = 80;
+  /* 触屏（手机）两种手势：
+     ① 卡片列表内：原生滚动；划到顶/底后继续同方向累计约 80px → 翻屏（单次手势内累计，松手清零）。
+     ② 列表外（hero / 标题区）：整屏翻页手势——全程接管、不给原生滚动，松手净位移 ≥45px → 翻相邻一屏。
+        由 JS 接管后，任何内核都无法因惯性甩动投影而跳过中间屏。 */
+  var TOUCH_GATE = 80;                 // 列表端点翻屏门槛
+  var PAGE_GATE = 45;                  // 整屏手势翻屏门槛（松手时的净位移）
   var touchAcc = 0;
   var touchDir = 0;
   var touchLastY = null;
+  var touchStartX = 0;
+  var touchStartY = 0;
+  var touchInInner = false;            // 本手势起手是否在卡片列表内
 
   function resetTouchGate() {
     touchAcc = 0;
@@ -234,16 +240,40 @@
     touchLastY = null;
   }
 
+  /* 整屏手势翻页：直接翻到相邻屏（不受列表滚动位置影响） */
+  function flipFromPageGesture(dir) {
+    var idx = currentIndex();
+    var next = idx + dir;
+    if (next < 0 || next >= sections.length) return;
+    if (sections[next].id === 'projects') {
+      glideTo(sections[next].offsetTop, dir, DURATION_SHEETS, easeInOutQuint);
+    } else {
+      glideTo(sections[next].offsetTop, dir, DURATION);
+    }
+  }
+
   window.addEventListener('touchstart', function (e) {
-    if (e.touches.length !== 1) { resetTouchGate(); return; }
+    if (e.touches.length !== 1) { resetTouchGate(); touchInInner = true; return; }
     touchAcc = 0;
     touchDir = 0;
     touchLastY = e.touches[0].clientY;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchInInner = !!(e.target && e.target.closest && e.target.closest('.writing__inner'));
   }, { passive: true });
 
   window.addEventListener('touchcancel', resetTouchGate, { passive: true });
 
-  window.addEventListener('touchend', resetTouchGate, { passive: true });
+  window.addEventListener('touchend', function (e) {
+    if (!touchInInner && touchLastY !== null && e.changedTouches && e.changedTouches.length) {
+      var netY = touchStartY - e.changedTouches[0].clientY;   // 上滑为正 = 下一页
+      var netX = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(netY) >= PAGE_GATE && Math.abs(netY) > Math.abs(netX)) {
+        flipFromPageGesture(netY > 0 ? 1 : -1);
+      }
+    }
+    resetTouchGate();
+  }, { passive: true });
 
   window.addEventListener('touchmove', function (e) {
     if (e.touches.length !== 1) { resetTouchGate(); return; }
@@ -252,21 +282,22 @@
     var y = e.touches[0].clientY;
     var dy = touchLastY - y;             // 手指上移 = 内容向下滚（与滚轮同向）
     touchLastY = y;
-    if (Math.abs(dy) < 1) return;
-    var dir = dy > 0 ? 1 : -1;
 
     if (animating) {
       if (e.cancelable) e.preventDefault();   // 翻页动画期间冻结触屏
       return;
     }
 
-    var sec = sections[currentIndex()];
-
-    /* 无列表的屏（hero）：交给原生滚动与贴合 */
-    if (!sec.querySelector('.writing__inner')) {
-      resetTouchGate();
+    /* 列表外起手（hero / 标题区）：整屏手势，先阻止一切原生滚动（防惯性甩动跳屏） */
+    if (!touchInInner) {
+      if (e.cancelable) e.preventDefault();
       return;
     }
+
+    if (Math.abs(dy) < 1) return;
+    var dir = dy > 0 ? 1 : -1;
+
+    var sec = sections[currentIndex()];
 
     /* 列表还能滚：交给原生滚动，不拦截 */
     if (innerCanScroll(sec, dir)) {
