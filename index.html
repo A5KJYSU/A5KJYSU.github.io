@@ -34,7 +34,7 @@ home: true
   <div class="writing__inner">
 
 {% for post in site.posts %}
-    <a class="card reveal" href="{{ post.url | relative_url }}">
+    <a class="card reveal" id="post-{{ post.slug }}" href="{{ post.url | relative_url }}">
       <div class="card__top">
         <span class="card__tag">文章</span>
         <span class="card__date">{{ post.date | date: "%Y-%m-%d" }}</span>

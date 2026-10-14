@@ -402,6 +402,16 @@ a { -webkit-tap-highlight-color: transparent; }
 
 .card + .card { margin-top: 16px; }
 
+/* 从文章返回时短暂高亮对应卡片 */
+.card.is-highlight {
+  border-color: rgba(79, 195, 247, 0.55);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 1px rgba(79, 195, 247, 0.2),
+    0 14px 38px rgba(3, 8, 20, 0.5);
+}
+
 /* ---------- post page ---------- */
 
 .post {

@@ -351,3 +351,63 @@
     }
   });
 })();
+
+/* 从文章返回：落到文章屏并定位 / 高亮对应卡片。
+   三种入口都兼容：新链接（#post-slug）、旧链接（#writing）、以及从文章页点“/”旧链接
+   （用 referrer 推断来源文章）——即使浏览器不执行锚点跳转，也能正确定位。 */
+(function () {
+  'use strict';
+
+  var root = document.documentElement;
+  if (root.className.indexOf('home') === -1) return;
+
+  var art = document.getElementById('writing');
+  if (!art) return;
+
+  var inner = art.querySelector('.writing__inner');
+
+  function safeDecode(s) {
+    try { return decodeURIComponent(s); } catch (e) { return s; }
+  }
+
+  function slugFromReferrer() {
+    if (!document.referrer) return null;
+    try {
+      var u = new URL(document.referrer);
+      if (u.origin !== location.origin) return null;
+      var m = u.pathname.match(/^\/\d{4}\/\d{2}\/\d{2}\/([^\/]+)\.html$/);
+      return m ? safeDecode(m[1]) : null;
+    } catch (e) { return null; }
+  }
+
+  function arrive() {
+    var el = location.hash.length > 1 ? document.getElementById(safeDecode(location.hash.slice(1))) : null;
+    var card = null;
+    if (!el) {
+      var slug = slugFromReferrer();                       // 从文章页返回（含旧链接）
+      if (slug) el = card = document.getElementById('post-' + slug);
+    } else if (el !== art && el.id !== 'projects' && art.contains(el)) {
+      card = el;                                           // #post-xxx 卡片锚点
+    }
+    if (!el) return;                                       // 正常进入首页：不动
+
+    var top = card ? art.offsetTop : el.offsetTop;
+    if (Math.abs(window.scrollY - top) > 2) {
+      window.scrollTo({ top: top, behavior: 'instant' });
+    }
+    root.classList.add('sheets-frosted');                  // 直接落在纸面区：毛玻璃就位
+
+    if (card && inner) {
+      var r = card.getBoundingClientRect();
+      var ir = inner.getBoundingClientRect();
+      var delta = (r.top - ir.top) - 26;                   // 卡片靠近列表顶部一点
+      if (Math.abs(delta) > 2) inner.scrollTop += delta;
+      card.classList.add('is-highlight');
+      window.setTimeout(function () { card.classList.remove('is-highlight'); }, 2200);
+    }
+  }
+
+  window.addEventListener('load', function () {
+    window.requestAnimationFrame(arrive);
+  });
+})();
