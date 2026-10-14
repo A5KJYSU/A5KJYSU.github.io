@@ -72,6 +72,11 @@ a { -webkit-tap-highlight-color: transparent; }
   to   { transform: scale(1.03); }
 }
 
+/* 纸面区（文章/项目屏，毛玻璃开启）暂停背景呼吸：视觉几乎无感，省掉每帧重算模糊的持续 GPU 负载 */
+html.sheets-frosted .hero__bg {
+  animation-play-state: paused;
+}
+
 /* 遮罩（scrim）已移除：背景图直接作为背景，不改动原图观感 */
 
 .hero__content {
