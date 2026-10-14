@@ -291,7 +291,7 @@ a { -webkit-tap-highlight-color: transparent; }
 .footer p {
   margin: 0;
   padding: 1.5rem var(--inset-x) 2.1rem;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   letter-spacing: 0.12em;
   color: var(--ink-faint);
 }
