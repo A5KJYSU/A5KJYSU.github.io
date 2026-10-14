@@ -11,10 +11,10 @@ description: "开始计数！"
 
 最后受不了了冲了几百米把两公里跑完了。
 
-![8F797AF6D9274F4C0A7AD23DA7DBDCCB](/assets/photos/8F797AF6D9274F4C0A7AD23DA7DBDCCB.webp)
+![8F797AF6D9274F4C0A7AD23DA7DBDCCB](/assets/photos/8F797AF6D9274F4C0A7AD23DA7DBDCCB.webp){: width="1119" height="1920" loading="lazy" decoding="async"}
 
 居然跑完了！
 
 不过里程还是好长，感觉一眼望不到头，继续坚持吧。
 
-![VRChat_2026-10-02_00-28-38.982_2160x3840](/assets/photos/VRChat_2026-10-02_00-28-38.982_2160x3840.webp)
+![VRChat_2026-10-02_00-28-38.982_2160x3840](/assets/photos/VRChat_2026-10-02_00-28-38.982_2160x3840.webp){: width="1152" height="2048" loading="lazy" decoding="async"}

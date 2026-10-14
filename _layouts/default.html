@@ -21,6 +21,9 @@
 <link rel="icon" type="image/png" href="{{ '/assets/icon.png' | relative_url }}">
 <link rel="apple-touch-icon" href="{{ '/assets/icon.png' | relative_url }}">
 <script>document.documentElement.className += ' js';</script>
+{% if page.home %}
+<link rel="preload" as="image" href="{{ '/assets/background.webp' | relative_url }}" fetchpriority="high">
+{% endif %}
 <link rel="stylesheet" href="{{ '/style.css' | relative_url }}?v={{ site.time | date: '%s' }}">
 </head>
 <body{% if page.home %} class="home"{% endif %}>

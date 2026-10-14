@@ -6,3 +6,6 @@ node_modules/
 _site/
 _tools/
 待压缩/
+
+# 背景原图（8.2MB）只留本地，不入库；网站使用压缩后的 background.webp
+assets/Background.png

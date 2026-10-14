@@ -7,7 +7,7 @@ description: "武装茂密"
 
 摄于VRChat
 
-![似进入无人境](/assets/photos/VRChat_2026-10-11_02-59-31.154_3840x2160.webp)
+![似进入无人境](/assets/photos/VRChat_2026-10-11_02-59-31.154_3840x2160.webp){: width="2048" height="1152" loading="lazy" decoding="async"}
 
 双刀加暗物质迷彩左轮的帅气茂密。
 
