@@ -650,7 +650,7 @@ html:not(.js) .home .writing {
   flex: 1 1 auto;
   overflow-y: auto;
   overscroll-behavior-y: contain;          /* 列表到端点后不再把滚动“链”给整页（翻屏交给 JS 的 800ms 动画） */
-  padding: 0 var(--inset-x) 0;
+  padding: 24px var(--inset-x) 0;          /* 顶部留白：第一张卡片返回高亮时的呼吸空间（配合标题下边距调整，整体间距不变） */
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }
@@ -660,7 +660,7 @@ html:not(.js) .home .writing {
 .home .writing__inner::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 999px; }
 .home .writing__inner::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.32); }
 
-.home .writing__heading { margin-bottom: 1.8rem; }
+.home .writing__heading { margin-bottom: 0.3rem; }   /* 与列表容器 24px 顶部留白合计保持原间距 */
 .home .footer { margin-top: 40px; }
 .home .footer p { padding: 1.3rem 0 1.8rem; }
 .home .footer p.footer__thanks { padding-bottom: 0.4rem; }
