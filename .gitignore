@@ -5,3 +5,4 @@ node_modules/
 .playwright-mcp/
 _site/
 _tools/
+待压缩/
