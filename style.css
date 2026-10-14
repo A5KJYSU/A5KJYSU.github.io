@@ -72,6 +72,11 @@ a { -webkit-tap-highlight-color: transparent; }
   to   { transform: scale(1.03); }
 }
 
+/* 触屏设备（QQ/微信等手机浏览器）：停掉背景呼吸动画——毛玻璃层之下持续重绘会拖累手机合成，翻页滑动时容易发抖 */
+@media (pointer: coarse) {
+  .hero__bg { animation: none; }
+}
+
 /* 遮罩（scrim）已移除：背景图直接作为背景，不改动原图观感 */
 
 .hero__content {
@@ -300,11 +305,11 @@ a { -webkit-tap-highlight-color: transparent; }
 .footer p.footer__thanks { padding-bottom: 0.4rem; }
 .footer p + p { padding-top: 0.25rem; }
 
-/* 致谢行里的小鲸鱼图标（随文字颜色、随字号缩放） */
+/* 致谢行里的小鲸鱼图标（DeepSeek 品牌蓝；尺寸随字号缩放） */
 .footer__whale {
   width: 1em;
   height: 1em;
-  fill: currentColor;
+  fill: #5786FE;
   vertical-align: -0.12em;
   margin-right: 0.3em;
 }
@@ -570,6 +575,7 @@ html.home {
 }
 
 .home .hero {
+  height: 100vh;
   height: 100svh;
   height: 100lvh;
   scroll-snap-align: start;
@@ -589,6 +595,7 @@ html.home {
   z-index: 2;
   display: flex;
   flex-direction: column;
+  height: 100vh;
   height: 100svh;
   height: 100lvh;
   scroll-snap-align: start;
