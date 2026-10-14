@@ -627,3 +627,26 @@ html:not(.js) .home .writing {
 
 html.home { scrollbar-width: none; }
 html.home::-webkit-scrollbar { display: none; }
+
+/* ---------- 移动端适配：底部栏动态与安全区（PC 端 env()=0、svh==lvh，不受影响） ---------- */
+
+html.home {
+  overscroll-behavior-y: contain;          /* 翻页时不触发下拉刷新 */
+}
+
+.home .scroll-cue {
+  bottom: calc(100lvh - 100svh + 24px + env(safe-area-inset-bottom, 0px));
+}
+
+.home .writing__inner {
+  max-height: 100svh;                      /* 内容区以“最小视口”为上限：底部栏弹出时也能完整阅读 */
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.home .footer p {
+  padding-bottom: calc(1.8rem + env(safe-area-inset-bottom, 0px));
+}
+
+.footer p {
+  padding-bottom: calc(2.1rem + env(safe-area-inset-bottom, 0px));
+}
