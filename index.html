@@ -28,12 +28,14 @@ home: true
 <main class="writing" id="writing">
   <div class="writing__head">
     <h2 class="writing__heading reveal">文章</h2>
-    <a class="writing__nav reveal" href="#projects">项目 →</a>
+    <a class="writing__nav reveal" href="#notes">杂谈 →</a>
   </div>
 
   <div class="writing__inner">
 
-{% for post in site.posts %}
+{% assign study_posts = site.posts | where: "section", "study" %}
+{% if study_posts.size > 0 %}
+{% for post in study_posts %}
     <a class="card reveal" id="post-{{ post.slug }}" href="{{ post.url | relative_url }}">
       <div class="card__top">
         <span class="card__tag">文章</span>
@@ -46,16 +48,44 @@ home: true
       <p class="card__desc">{{ post.description | default: post.excerpt | strip_html | strip_newlines | truncate: 110 }}</p>
     </a>
 {% endfor %}
-<!-- 项目已迁至 /projects/ 页面（首页只列文章） -->
-
-    <p class="writing__more reveal reveal--d2">更多内容筹备中。</p>
+{% else %}
+    <p class="writing__more reveal">学习成果整理中……</p>
+{% endif %}
   </div>
 </main>
+
+<section class="writing" id="notes" aria-label="杂谈">
+  <div class="writing__head">
+    <h2 class="writing__heading reveal">杂谈</h2>
+    <div class="writing__navs">
+      <a class="writing__nav reveal" href="#writing">← 文章</a>
+      <a class="writing__nav reveal" href="#projects">项目 →</a>
+    </div>
+  </div>
+
+  <div class="writing__inner">
+
+{% assign life_posts = site.posts | where_exp: "post", "post.section != 'study'" %}
+{% for post in life_posts %}
+    <a class="card reveal" id="post-{{ post.slug }}" href="{{ post.url | relative_url }}">
+      <div class="card__top">
+        <span class="card__tag">杂谈</span>
+        <span class="card__date">{{ post.date | date: "%Y-%m-%d" }}</span>
+        <span class="card__arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13m-6-6 6 6-6 6"/></svg>
+        </span>
+      </div>
+      <h3 class="card__title">{{ post.title }}</h3>
+      <p class="card__desc">{{ post.description | default: post.excerpt | strip_html | strip_newlines | truncate: 110 }}</p>
+    </a>
+{% endfor %}
+  </div>
+</section>
 
 <section class="writing" id="projects" aria-label="项目">
   <div class="writing__head">
     <h2 class="writing__heading reveal">项目</h2>
-    <a class="writing__nav reveal" href="#writing">文章 →</a>
+    <a class="writing__nav reveal" href="#notes">← 杂谈</a>
   </div>
 
   <div class="writing__inner">

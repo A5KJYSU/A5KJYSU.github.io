@@ -164,7 +164,8 @@
     if (innerCanScroll(sections[idx], dir)) return false;
     var next = idx + dir;
     if (next < 0 || next >= sections.length) return false;
-    if (sections[next].id === 'projects') {
+    /* 纸面间下行（进杂谈/项目）用慢版 1000ms；hero↔文章与上行维持 800ms */
+    if (dir > 0 && sections[next].id !== 'writing') {
       glideTo(sections[next].offsetTop, dir, DURATION_SHEETS, easeInOutQuint);   // 尾端更慢
     } else {
       glideTo(sections[next].offsetTop, dir, DURATION);
@@ -245,7 +246,7 @@
     var idx = currentIndex();
     var next = idx + dir;
     if (next < 0 || next >= sections.length) return;
-    if (sections[next].id === 'projects') {
+    if (dir > 0 && sections[next].id !== 'writing') {
       glideTo(sections[next].offsetTop, dir, DURATION_SHEETS, easeInOutQuint);
     } else {
       glideTo(sections[next].offsetTop, dir, DURATION);
@@ -344,10 +345,11 @@
     var idx = sections.indexOf(target);
     if (idx < 0) return;
     e.preventDefault();
-    if (target.id === 'projects') {
-      glideTo(target.offsetTop, idx > currentIndex() ? 1 : -1, DURATION_SHEETS, easeInOutQuint);
+    var dir = idx > currentIndex() ? 1 : -1;
+    if (dir > 0 && target.id !== 'writing') {
+      glideTo(target.offsetTop, dir, DURATION_SHEETS, easeInOutQuint);
     } else {
-      glideTo(target.offsetTop, idx > currentIndex() ? 1 : -1, DURATION);
+      glideTo(target.offsetTop, dir, DURATION);
     }
   });
 })();
@@ -360,11 +362,7 @@
 
   var root = document.documentElement;
   if (root.className.indexOf('home') === -1) return;
-
-  var art = document.getElementById('writing');
-  if (!art) return;
-
-  var inner = art.querySelector('.writing__inner');
+  if (!document.getElementById('writing')) return;   // 非首页没有纸面结构
 
   function safeDecode(s) {
     try { return decodeURIComponent(s); } catch (e) { return s; }
@@ -383,20 +381,25 @@
   function arrive() {
     var el = location.hash.length > 1 ? document.getElementById(safeDecode(location.hash.slice(1))) : null;
     var card = null;
-    if (!el) {
+    if (el && el.classList && el.classList.contains('card')) {
+      card = el;                                           // #post-xxx 卡片锚点
+    } else if (!el) {
       var slug = slugFromReferrer();                       // 从文章页返回（含旧链接）
       if (slug) el = card = document.getElementById('post-' + slug);
-    } else if (el !== art && el.id !== 'projects' && art.contains(el)) {
-      card = el;                                           // #post-xxx 卡片锚点
     }
     if (!el) return;                                       // 正常进入首页：不动
 
-    var top = card ? art.offsetTop : el.offsetTop;
+    /* 卡片可能在任意一张纸面屏（文章/杂谈）：定位到它所在的屏 */
+    var sec = card
+      ? card.closest('.writing')
+      : (el.classList && el.classList.contains('writing') ? el : null);
+    var top = sec ? sec.offsetTop : el.offsetTop;
     if (Math.abs(window.scrollY - top) > 2) {
       window.scrollTo({ top: top, behavior: 'instant' });
     }
     root.classList.add('sheets-frosted');                  // 直接落在纸面区：毛玻璃就位
 
+    var inner = sec ? sec.querySelector('.writing__inner') : null;
     if (card && inner) {
       var r = card.getBoundingClientRect();
       var ir = inner.getBoundingClientRect();

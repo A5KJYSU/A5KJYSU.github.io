@@ -241,13 +241,18 @@ html.sheets-frosted .hero__bg {
   margin-bottom: 0.95rem;
 }
 
-.card__tag {
+.card__tag, .post__tag {
   font-size: 0.72rem;
   letter-spacing: 0.24em;
   color: var(--accent);
   border: 1px solid rgba(79, 195, 247, 0.45);
   border-radius: 999px;
   padding: 0.16rem 0.66rem 0.16rem 0.72rem;
+}
+
+.post__tag {
+  display: inline-block;
+  margin-right: 0.7rem;
 }
 
 .card__arrow {
@@ -650,6 +655,13 @@ html:not(.js) .home .writing {
 }
 
 .writing__nav:hover { color: var(--accent); }
+
+/* 屏头右侧多个导航链接（杂谈屏：← 文章 / 项目 →） */
+.writing__navs {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
 
 .home .writing__inner {
   flex: 1 1 auto;
